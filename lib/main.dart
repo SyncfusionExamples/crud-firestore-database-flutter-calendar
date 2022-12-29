@@ -9,26 +9,32 @@ import 'package:intl/intl.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(LoadDataFromFireBase());
+  runApp(const MyApp());
 }
 
-class LoadDataFromFireBase extends StatelessWidget {
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'FireBase',
-      home: LoadDataFromFireStore(),
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: const MyHomePage(),
     );
   }
 }
 
-class LoadDataFromFireStore extends StatefulWidget {
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key});
+
   @override
-  LoadDataFromFireStoreState createState() => LoadDataFromFireStoreState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class LoadDataFromFireStoreState extends State<LoadDataFromFireStore> {
+class _MyHomePageState extends State<MyHomePage> {
   List<Color> _colorCollection = <Color>[];
   MeetingDataSource? events;
   final List<String> options = <String>['Add', 'Delete', 'Update'];
@@ -53,7 +59,7 @@ class LoadDataFromFireStoreState extends State<LoadDataFromFireStore> {
             return;
           }
 
-          final Random random = new Random();
+          final Random random = Random();
           Meeting app = Meeting.fromFireBaseSnapShotData(element,  _colorCollection[random.nextInt(9)]);
           setState(() {
             events!.appointments!.add(app);
@@ -64,7 +70,7 @@ class LoadDataFromFireStoreState extends State<LoadDataFromFireStore> {
             return;
           }
 
-          final Random random = new Random();
+          final Random random = Random();
           Meeting app = Meeting.fromFireBaseSnapShotData(element,  _colorCollection[random.nextInt(9)]);
           setState(() {
             int index = events!.appointments!
@@ -98,18 +104,19 @@ class LoadDataFromFireStoreState extends State<LoadDataFromFireStore> {
     super.initState();
   }
 
+
   Future<void> getDataFromFireStore() async {
     var snapShotsValue = await fireStoreReference
         .collection("CalendarAppointmentCollection")
         .get();
 
-    final Random random = new Random();
+    final Random random = Random();
     List<Meeting> list = snapShotsValue.docs
         .map((e) =>
         Meeting(
             eventName: e.data()['Subject'],
             from:
-                DateFormat('dd/MM/yyyy HH:mm:ss').parse(e.data()['StartTime']),
+            DateFormat('dd/MM/yyyy HH:mm:ss').parse(e.data()['StartTime']),
             to: DateFormat('dd/MM/yyyy HH:mm:ss').parse(e.data()['EndTime']),
             background: _colorCollection[random.nextInt(9)],
             isAllDay: false,
@@ -127,45 +134,45 @@ class LoadDataFromFireStoreState extends State<LoadDataFromFireStore> {
     return Scaffold(
         appBar: AppBar(
             leading: PopupMenuButton<String>(
-          icon: Icon(Icons.settings),
-          itemBuilder: (BuildContext context) => options.map((String choice) {
-            return PopupMenuItem<String>(
-              value: choice,
-              child: Text(choice),
-            );
-          }).toList(),
-          onSelected: (String value) {
-            if (value == 'Add') {
-              fireStoreReference
-                  .collection("CalendarAppointmentCollection")
-                  .doc("1")
-                  .set({
-                'Subject': 'Mastering Flutter',
-                'StartTime': '07/04/2020 08:00:00',
-                'EndTime': '07/04/2020 09:00:00'
-              });
-            } else if (value == "Delete") {
-              try {
-                fireStoreReference
-                    .collection('CalendarAppointmentCollection')
-                    .doc('1')
-                    .delete();
-              } catch (e) {}
-            } else if (value == "Update") {
-              try {
-                fireStoreReference
-                    .collection('CalendarAppointmentCollection')
-                    .doc('1')
-                    .update({'Subject': 'Meeting'});
-              } catch (e) {}
-            }
-          },
-        )),
+              icon: const Icon(Icons.settings),
+              itemBuilder: (BuildContext context) => options.map((String choice) {
+                return PopupMenuItem<String>(
+                  value: choice,
+                  child: Text(choice),
+                );
+              }).toList(),
+              onSelected: (String value) {
+                if (value == 'Add') {
+                  fireStoreReference
+                      .collection("CalendarAppointmentCollection")
+                      .doc("1")
+                      .set({
+                    'Subject': 'Mastering Flutter',
+                    'StartTime': '07/04/2020 08:00:00',
+                    'EndTime': '07/04/2020 09:00:00'
+                  });
+                } else if (value == "Delete") {
+                  try {
+                    fireStoreReference
+                        .collection('CalendarAppointmentCollection')
+                        .doc('1')
+                        .delete();
+                  } catch (e) {}
+                } else if (value == "Update") {
+                  try {
+                    fireStoreReference
+                        .collection('CalendarAppointmentCollection')
+                        .doc('1')
+                        .update({'Subject': 'Meeting'});
+                  } catch (e) {}
+                }
+              },
+            )),
         body: SfCalendar(
           view: CalendarView.month,
           initialDisplayDate: DateTime(2020, 4, 5, 9, 0, 0),
           dataSource: events,
-          monthViewSettings: MonthViewSettings(
+          monthViewSettings: const MonthViewSettings(
             showAgenda: true,
           ),
         ));
@@ -226,21 +233,21 @@ class Meeting {
 
   Meeting(
       {this.eventName,
-      this.from,
-      this.to,
-      this.background,
-      this.isAllDay,
-      this.key});
+        this.from,
+        this.to,
+        this.background,
+        this.isAllDay,
+        this.key});
 
   static Meeting fromFireBaseSnapShotData(dynamic element, Color color) {
     return Meeting(
-              eventName: element.doc.data()!['Subject'],
-              from: DateFormat('dd/MM/yyyy HH:mm:ss')
-                  .parse(element.doc.data()!['StartTime']),
-              to: DateFormat('dd/MM/yyyy HH:mm:ss')
-                  .parse(element.doc.data()!['EndTime']),
-              background: color,
-              isAllDay: false,
-              key: element.doc.id);
+        eventName: element.doc.data()!['Subject'],
+        from: DateFormat('dd/MM/yyyy HH:mm:ss')
+            .parse(element.doc.data()!['StartTime']),
+        to: DateFormat('dd/MM/yyyy HH:mm:ss')
+            .parse(element.doc.data()!['EndTime']),
+        background: color,
+        isAllDay: false,
+        key: element.doc.id);
   }
 }
